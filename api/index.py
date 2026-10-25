@@ -11,7 +11,7 @@ import requests
 from openai import OpenAI
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
-ALLOWED_USER_ID = int(os.environ["ALLOWED_USER_ID"])
+ALLOWED_USER_IDS = {int(x) for x in os.environ["ALLOWED_USER_ID"].split(",") if x.strip()}
 WEBHOOK_SECRET = os.environ["WEBHOOK_SECRET"]
 CRON_SECRET = os.environ["CRON_SECRET"]
 TZ = ZoneInfo(os.getenv("TZ_NAME", "America/Argentina/Buenos_Aires"))
@@ -184,7 +184,7 @@ def handle_update(update):
     msg = update.get("message")
     if not msg or "text" not in msg:
         return
-    if msg["from"]["id"] != ALLOWED_USER_ID:
+    if msg["from"]["id"] not in ALLOWED_USER_IDS:
         return
     # Telegram reintenta si tardamos; descartamos updates repetidos.
     if redis("SET", f"upd:{update['update_id']}", "1", "NX", "EX", 600) is None:
