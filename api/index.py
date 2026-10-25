@@ -16,8 +16,15 @@ WEBHOOK_SECRET = os.environ["WEBHOOK_SECRET"]
 CRON_SECRET = os.environ["CRON_SECRET"]
 TZ = ZoneInfo(os.getenv("TZ_NAME", "America/Argentina/Buenos_Aires"))
 MODEL = os.environ["LLM_MODEL"]
-REDIS_URL = os.environ.get("UPSTASH_REDIS_REST_URL") or os.environ["KV_REST_API_URL"]
-REDIS_TOKEN = os.environ.get("UPSTASH_REDIS_REST_TOKEN") or os.environ["KV_REST_API_TOKEN"]
+def env_ending(*suffixes):
+    for k, v in os.environ.items():
+        if k.endswith(suffixes) and v:
+            return v
+    raise KeyError(f"Falta una variable de entorno terminada en {suffixes}")
+
+
+REDIS_URL = env_ending("REST_API_URL", "REDIS_REST_URL")
+REDIS_TOKEN = env_ending("REST_API_TOKEN", "REDIS_REST_TOKEN")
 MAX_HISTORY = 20
 
 llm = OpenAI(base_url=os.environ["LLM_BASE_URL"], api_key=os.environ["LLM_API_KEY"])
